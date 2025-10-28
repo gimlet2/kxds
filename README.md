@@ -115,8 +115,11 @@ fun main() {
 KXDS supports all common XSD built-in types:
 
 - **String Types**: string, normalizedString, token, language, Name, NCName, ID, IDREF, ENTITY, NMTOKEN
-- **Numeric Types (Signed)**: int, integer, long, short, byte, decimal, positiveInteger, negativeInteger, nonPositiveInteger, nonNegativeInteger
-- **Numeric Types (Unsigned)**: unsignedLong, unsignedInt, unsignedShort, unsignedByte
+- **Numeric Types (Signed)**: 
+  - int, integer, long, short, byte, decimal
+  - positiveInteger, negativeInteger, nonPositiveInteger, nonNegativeInteger
+- **Numeric Types (Unsigned)**: 
+  - unsignedLong, unsignedInt, unsignedShort, unsignedByte
 - **Boolean**: boolean
 - **Floating Point**: float, double
 - **Date/Time**: dateTime, date, time, duration
@@ -150,12 +153,12 @@ data class Person(
 
 #### Cardinality (minOccurs, maxOccurs)
 
-Elements with varying cardinality are properly handled:
+Elements with varying cardinality are properly handled. Required elements remain non-nullable, elements with `minOccurs="0"` become nullable with a default value, and elements with `maxOccurs > 1` or `unbounded` generate List properties:
 
 ```xml
-<xs:element name="title" type="xs:string"/>                           <!-- Required -->
-<xs:element name="summary" type="xs:string" minOccurs="0"/>          <!-- Optional -->
-<xs:element name="tags" type="xs:string" maxOccurs="unbounded"/>     <!-- List -->
+<xs:element name="title" type="xs:string"/>
+<xs:element name="summary" type="xs:string" minOccurs="0"/>
+<xs:element name="tags" type="xs:string" maxOccurs="unbounded"/>
 ```
 
 Generates:
