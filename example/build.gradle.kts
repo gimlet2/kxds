@@ -1,5 +1,5 @@
 plugins {
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+    id("com.google.devtools.ksp") version "2.3.0"
     kotlin("jvm") version "2.1.0"
 
 }
@@ -14,7 +14,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(project(":kxds-hosting"))
-    implementation("com.google.devtools.ksp:symbol-processing-api:2.1.0-1.0.29")
+    implementation("com.google.devtools.ksp:symbol-processing-api:2.3.0")
     ksp(project(":kxds-hosting"))
     testImplementation(kotlin("test"))
 }
