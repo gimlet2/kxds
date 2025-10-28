@@ -22,6 +22,7 @@
             towards the end of this schema document</xs:documentation>
     </xs:annotation>
 
+    <!-- Commented out to avoid external network dependency during build
     <xs:import namespace="http://www.w3.org/XML/1998/namespace" schemaLocation="http://www.w3.org/2001/xml.xsd">
         <xs:annotation>
             <xs:documentation>
@@ -30,6 +31,7 @@
             </xs:documentation>
         </xs:annotation>
     </xs:import>
+    -->
 
     <xs:complexType name="openAttrs">
         <xs:annotation>
@@ -191,7 +193,9 @@
                     <xs:attribute name="attributeFormDefault" type="xs:formChoice" use="optional" default="unqualified"/>
                     <xs:attribute name="elementFormDefault" type="xs:formChoice" use="optional" default="unqualified"/>
                     <xs:attribute name="id" type="xs:ID"/>
+                    <!-- Commented out to avoid dependency on xml.xsd import
                     <xs:attribute ref="xml:lang"/>
+                    -->
                 </xs:extension>
             </xs:complexContent>
         </xs:complexType>
@@ -1208,7 +1212,9 @@
                 <xs:any processContents="lax"/>
             </xs:sequence>
             <xs:attribute name="source" type="xs:anyURI"/>
+            <!-- Commented out to avoid dependency on xml.xsd import
             <xs:attribute ref="xml:lang"/>
+            -->
             <xs:anyAttribute namespace="##other" processContents="lax"/>
         </xs:complexType>
     </xs:element>
