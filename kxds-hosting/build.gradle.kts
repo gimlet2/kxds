@@ -36,5 +36,5 @@ xjc {
 }
 
 sourceSets.main {
-    java.srcDir("build/generated/sources/xjs/java")
+    java.srcDir("build/generated/sources/xjc/java")
 }

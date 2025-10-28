@@ -32,11 +32,14 @@ class XDSProcessor(
         resolver.getSymbolsWithAnnotation("com.restmonkeys.kxds.XDSProcessorAnnotation")
             .forEach {
                 val schemaPath = it.getAnnotationsByType(XDSProcessorAnnotation::class).first().schema
-                logger.warn("Found schema: $schemaPath")
-                File("$rootPath/$schemaPath").readText().also {
-                    logger.warn(it)
-
-                    generate(it)
+                logger.info("Processing schema: $schemaPath")
+                val schemaFile = File(rootPath, schemaPath)
+                if (schemaFile.exists()) {
+                    val schemaContent = schemaFile.readText()
+                    logger.info("Schema loaded successfully, size: ${schemaContent.length} bytes")
+                    generate(schemaContent)
+                } else {
+                    logger.error("Schema file not found: ${schemaFile.absolutePath}")
                 }
             }
 
@@ -47,18 +50,21 @@ class XDSProcessor(
         val context = JAXBContext.newInstance(Schema::class.java.packageName, Schema::class.java.classLoader)
         val result = context.createUnmarshaller()
             .unmarshal(schema.trim().byteInputStream())
-        result as Schema
-        result.simpleTypeOrComplexTypeOrGroup.forEach {
+        val schemaObj = result as? Schema ?: run {
+            logger.error("Invalid schema format")
+            return
+        }
+        schemaObj.simpleTypeOrComplexTypeOrGroup.forEach {
             when (it) {
                 is TopLevelComplexType -> {
-                    logger.warn(it.name)
+                    logger.info("Generating class for complex type: ${it.name}")
                     toDataClass(it).toCode()
                 }
 
                 is TopLevelElement -> {
-                    logger.warn(it.name)
+                    logger.info("Generating class for element: ${it.name}")
                     it.complexType?.let { complexType ->
-                        toDataClass(complexType).toCode()
+                        toDataClass(complexType, it.name).toCode()
                     }
                 }
             }
@@ -72,8 +78,9 @@ class XDSProcessor(
         }
     }
 
-    fun toDataClass(complexType: ComplexType): TypeSpec {
-        return TypeSpec.classBuilder(complexType.name)
+    fun toDataClass(complexType: ComplexType, explicitName: String? = null): TypeSpec {
+        val className = explicitName ?: complexType.name
+        return TypeSpec.classBuilder(className)
             .addModifiers(KModifier.DATA).also { t ->
                 t.primaryConstructor(FunSpec.constructorBuilder().also { c ->
                     complexType.choice?.particle?.forEach {
@@ -116,8 +123,17 @@ class XDSProcessor(
     fun getType(t: QName): KClass<*> {
         return when (t.localPart) {
             "string" -> String::class
+            "int", "integer" -> Int::class
+            "long" -> Long::class
+            "short" -> Short::class
+            "byte" -> Byte::class
+            "boolean" -> Boolean::class
+            "float" -> Float::class
+            "double" -> Double::class
+            "decimal" -> java.math.BigDecimal::class
             else -> {
-                Unit::class
+                logger.warn("Unsupported type '${t.localPart}', defaulting to String")
+                String::class
             }
         }
     }
