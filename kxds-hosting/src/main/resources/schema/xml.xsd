@@ -110,7 +110,8 @@
   </xs:simpleType>
  </xs:attribute>
  
- <xs:attribute name="base" type="xs:anyURI"> <xs:annotation>
+ <xs:attribute name="base" type="xs:anyURI">
+  <xs:annotation>
    <xs:documentation>
     <div>
      
@@ -176,10 +177,10 @@
      </p>
      <blockquote>
        <p>
-	In appreciation for his vision, leadership and
-	dedication the W3C XML Plenary on this 10th day of
-	February, 2000, reserves for Jon Bosak in perpetuity
-	the XML name "xml:Father".
+In appreciation for his vision, leadership and
+dedication the W3C XML Plenary on this 10th day of
+February, 2000, reserves for Jon Bosak in perpetuity
+the XML name "xml:Father".
        </p>
      </blockquote>
     </div>
@@ -242,25 +243,25 @@
      <p>
       In keeping with the XML Schema WG's standard versioning
       policy, this schema document will persist at
-      <a href="http://www.w3.org/2009/01/xml.xsd">
-       http://www.w3.org/2009/01/xml.xsd</a>.
+      <a href="http://www.w3.org/2001/xml.xsd">
+       http://www.w3.org/2001/xml.xsd</a>.
      </p>
      <p>
       At the date of issue it can also be found at
-      <a href="http://www.w3.org/2001/xml.xsd">
-       http://www.w3.org/2001/xml.xsd</a>.
+      <a href="http://www.w3.org/2009/01/xml.xsd">
+       http://www.w3.org/2009/01/xml.xsd</a>.
      </p>
      <p>
       The schema document at that URI may however change in the future,
       in order to remain compatible with the latest version of XML
       Schema itself, or with the XML namespace itself.  In other words,
       if the XML Schema or XML namespaces change, the version of this
-      document at <a href="http://www.w3.org/2001/xml.xsd">
-       http://www.w3.org/2001/xml.xsd 
+      document at <a href="http://www.w3.org/2009/01/xml.xsd">
+       http://www.w3.org/2009/01/xml.xsd 
       </a> 
       will change accordingly; the version at 
-      <a href="http://www.w3.org/2009/01/xml.xsd">
-       http://www.w3.org/2009/01/xml.xsd 
+      <a href="http://www.w3.org/2001/xml.xsd">
+       http://www.w3.org/2001/xml.xsd 
       </a> 
       will not change.
      </p>
@@ -270,13 +271,13 @@
      </p>
      <ul>
       <li><a href="http://www.w3.org/2009/01/xml.xsd">
-	http://www.w3.org/2009/01/xml.xsd</a></li>
+http://www.w3.org/2009/01/xml.xsd</a></li>
       <li><a href="http://www.w3.org/2007/08/xml.xsd">
-	http://www.w3.org/2007/08/xml.xsd</a></li>
+http://www.w3.org/2007/08/xml.xsd</a></li>
       <li><a href="http://www.w3.org/2004/10/xml.xsd">
-	http://www.w3.org/2004/10/xml.xsd</a></li>
+http://www.w3.org/2004/10/xml.xsd</a></li>
       <li><a href="http://www.w3.org/2001/03/xml.xsd">
-	http://www.w3.org/2001/03/xml.xsd</a></li>
+http://www.w3.org/2001/03/xml.xsd</a></li>
      </ul>
     </div>
    </div>
