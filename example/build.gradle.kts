@@ -1,5 +1,5 @@
 plugins {
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
+    id("com.google.devtools.ksp") version "2.3.0"
     kotlin("jvm") version "2.1.0"
 
 }
