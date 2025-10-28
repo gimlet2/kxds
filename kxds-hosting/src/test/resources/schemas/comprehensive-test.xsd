@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://test.example.com/comprehensive"
+           xmlns="http://test.example.com/comprehensive"
+           elementFormDefault="qualified">
+
+    <!-- Enumeration example -->
+    <xs:simpleType name="Status">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="draft"/>
+            <xs:enumeration value="published"/>
+            <xs:enumeration value="archived"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Complex type with various features -->
+    <xs:complexType name="Article">
+        <xs:sequence>
+            <!-- Required elements -->
+            <xs:element name="title" type="xs:string"/>
+            <xs:element name="content" type="xs:string"/>
+            
+            <!-- Optional element (minOccurs=0) -->
+            <xs:element name="summary" type="xs:string" minOccurs="0"/>
+            
+            <!-- Nillable element -->
+            <xs:element name="publishDate" type="xs:dateTime" nillable="true"/>
+            
+            <!-- List element (maxOccurs > 1) -->
+            <xs:element name="tags" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            
+            <!-- Element with various types -->
+            <xs:element name="viewCount" type="xs:unsignedInt"/>
+            <xs:element name="rating" type="xs:decimal"/>
+        </xs:sequence>
+        
+        <!-- Required attribute -->
+        <xs:attribute name="id" type="xs:string" use="required"/>
+        
+        <!-- Optional attributes -->
+        <xs:attribute name="author" type="xs:string"/>
+        <xs:attribute name="featured" type="xs:boolean"/>
+    </xs:complexType>
+
+</xs:schema>

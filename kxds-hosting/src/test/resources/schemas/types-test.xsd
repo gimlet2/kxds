@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://test.example.com/types"
+           xmlns="http://test.example.com/types"
+           elementFormDefault="qualified">
+
+    <!-- Test various XSD types -->
+    <xs:complexType name="AllTypes">
+        <xs:sequence>
+            <!-- String types -->
+            <xs:element name="stringField" type="xs:string"/>
+            <xs:element name="tokenField" type="xs:token"/>
+            
+            <!-- Numeric types - signed -->
+            <xs:element name="intField" type="xs:int"/>
+            <xs:element name="longField" type="xs:long"/>
+            <xs:element name="shortField" type="xs:short"/>
+            <xs:element name="byteField" type="xs:byte"/>
+            <xs:element name="decimalField" type="xs:decimal"/>
+            <xs:element name="integerField" type="xs:integer"/>
+            
+            <!-- Numeric types - unsigned -->
+            <xs:element name="unsignedLongField" type="xs:unsignedLong"/>
+            <xs:element name="unsignedIntField" type="xs:unsignedInt"/>
+            <xs:element name="unsignedShortField" type="xs:unsignedShort"/>
+            <xs:element name="unsignedByteField" type="xs:unsignedByte"/>
+            
+            <!-- Boolean -->
+            <xs:element name="booleanField" type="xs:boolean"/>
+            
+            <!-- Floating point -->
+            <xs:element name="floatField" type="xs:float"/>
+            <xs:element name="doubleField" type="xs:double"/>
+            
+            <!-- Date and time types -->
+            <xs:element name="dateTimeField" type="xs:dateTime"/>
+            <xs:element name="dateField" type="xs:date"/>
+            <xs:element name="timeField" type="xs:time"/>
+            <xs:element name="durationField" type="xs:duration"/>
+            
+            <!-- Binary types -->
+            <xs:element name="base64BinaryField" type="xs:base64Binary"/>
+            <xs:element name="hexBinaryField" type="xs:hexBinary"/>
+            
+            <!-- URI -->
+            <xs:element name="uriField" type="xs:anyURI"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

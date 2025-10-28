@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://test.example.com/nillable"
+           xmlns="http://test.example.com/nillable"
+           elementFormDefault="qualified">
+
+    <!-- Test nillable elements -->
+    <xs:complexType name="Product">
+        <xs:sequence>
+            <xs:element name="productName" type="xs:string"/>
+            <xs:element name="price" type="xs:decimal" nillable="true"/>
+            <xs:element name="description" type="xs:string" nillable="true"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>
