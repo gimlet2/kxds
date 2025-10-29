@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://test.example.com/cardinality"
+           xmlns="http://test.example.com/cardinality"
+           elementFormDefault="qualified">
+
+    <!-- Test cardinality (minOccurs, maxOccurs) -->
+    <xs:complexType name="Library">
+        <xs:sequence>
+            <xs:element name="title" type="xs:string"/>
+            <xs:element name="author" type="xs:string" minOccurs="0"/>
+            <xs:element name="isbn" type="xs:string" minOccurs="0" maxOccurs="1"/>
+            <xs:element name="books" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="tags" type="xs:string" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element name="chapters" type="xs:string" maxOccurs="10"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>
