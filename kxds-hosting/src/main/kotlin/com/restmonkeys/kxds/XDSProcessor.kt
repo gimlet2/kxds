@@ -40,6 +40,16 @@ class XDSProcessor(
     val logger: KSPLogger,
     val options: Map<String, String>
 ) : SymbolProcessor {
+    
+    companion object {
+        // ClassName for Jakarta Validation annotations
+        private val JAKARTA_VALIDATION_PKG = "jakarta.validation.constraints"
+        
+        // Default maximum integer digits when only fractionDigits is specified
+        // This is a reasonable upper bound for most decimal use cases
+        private const val DEFAULT_MAX_INTEGER_DIGITS = 999
+    }
+
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val rootPath = options["path"] ?: error("path option is required")
@@ -385,7 +395,7 @@ class XDSProcessor(
     ) {
         // Handle pattern
         facetMap["pattern"]?.let { pattern ->
-            val patternAnnotation = AnnotationSpec.builder(ClassName("jakarta.validation.constraints", "Pattern"))
+            val patternAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "Pattern"))
                 .addMember("regexp = %S", pattern)
                 .build()
             propertyBuilder.addAnnotation(patternAnnotation)
@@ -398,13 +408,13 @@ class XDSProcessor(
         
         if (length != null) {
             // Exact length specified
-            val sizeAnnotation = AnnotationSpec.builder(ClassName("jakarta.validation.constraints", "Size"))
+            val sizeAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "Size"))
                 .addMember("min = %L, max = %L", length, length)
                 .build()
             propertyBuilder.addAnnotation(sizeAnnotation)
         } else if (minLength != null || maxLength != null) {
             // Min and/or max length specified
-            val sizeBuilder = AnnotationSpec.builder(ClassName("jakarta.validation.constraints", "Size"))
+            val sizeBuilder = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "Size"))
             if (minLength != null) {
                 sizeBuilder.addMember("min = %L", minLength)
             }
@@ -419,14 +429,14 @@ class XDSProcessor(
             "decimal" -> {
                 // Handle min constraints
                 facetMap["minInclusive"]?.let { minValue ->
-                    val minAnnotation = AnnotationSpec.builder(ClassName("jakarta.validation.constraints", "DecimalMin"))
+                    val minAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "DecimalMin"))
                         .addMember("value = %S", minValue)
                         .build()
                     propertyBuilder.addAnnotation(minAnnotation)
                 }
                 
                 facetMap["minExclusive"]?.let { minValue ->
-                    val minAnnotation = AnnotationSpec.builder(ClassName("jakarta.validation.constraints", "DecimalMin"))
+                    val minAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "DecimalMin"))
                         .addMember("value = %S", minValue)
                         .addMember("inclusive = false")
                         .build()
@@ -435,14 +445,14 @@ class XDSProcessor(
                 
                 // Handle max constraints
                 facetMap["maxInclusive"]?.let { maxValue ->
-                    val maxAnnotation = AnnotationSpec.builder(ClassName("jakarta.validation.constraints", "DecimalMax"))
+                    val maxAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "DecimalMax"))
                         .addMember("value = %S", maxValue)
                         .build()
                     propertyBuilder.addAnnotation(maxAnnotation)
                 }
                 
                 facetMap["maxExclusive"]?.let { maxValue ->
-                    val maxAnnotation = AnnotationSpec.builder(ClassName("jakarta.validation.constraints", "DecimalMax"))
+                    val maxAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "DecimalMax"))
                         .addMember("value = %S", maxValue)
                         .addMember("inclusive = false")
                         .build()
@@ -456,17 +466,19 @@ class XDSProcessor(
                 val fractionDigits = facetMap["fractionDigits"]?.toIntOrNull()
                 
                 if (totalDigits != null || fractionDigits != null) {
-                    val digitsBuilder = AnnotationSpec.builder(ClassName("jakarta.validation.constraints", "Digits"))
+                    val digitsBuilder = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "Digits"))
                     if (totalDigits != null && fractionDigits != null) {
-                        // integer part = total - fraction
+                        // Integer part = total - fraction
+                        // Use maxOf(0, ...) to handle edge case where fractionDigits > totalDigits
+                        // (which would be invalid XSD, but we handle gracefully)
                         val integerDigits = maxOf(0, totalDigits - fractionDigits)
                         digitsBuilder.addMember("integer = %L, fraction = %L", integerDigits, fractionDigits)
                     } else if (totalDigits != null) {
                         // Only totalDigits specified, assume no fractional part
                         digitsBuilder.addMember("integer = %L, fraction = 0", totalDigits)
                     } else if (fractionDigits != null) {
-                        // Only fractionDigits specified, use large integer limit
-                        digitsBuilder.addMember("integer = 999, fraction = %L", fractionDigits)
+                        // Only fractionDigits specified, use reasonable default for integer limit
+                        digitsBuilder.addMember("integer = %L, fraction = %L", DEFAULT_MAX_INTEGER_DIGITS, fractionDigits)
                     }
                     propertyBuilder.addAnnotation(digitsBuilder.build())
                 }
