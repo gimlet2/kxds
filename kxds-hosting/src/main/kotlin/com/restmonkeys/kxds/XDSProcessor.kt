@@ -10,6 +10,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.asTypeName
 import jakarta.xml.bind.JAXBContext
 import jakarta.xml.bind.JAXBElement
 import org.w3._2001.xmlschema.Attribute
@@ -49,6 +50,9 @@ class XDSProcessor(
         // This is a reasonable upper bound for most decimal use cases
         private const val DEFAULT_MAX_INTEGER_DIGITS = 999
     }
+    
+    // Track custom types defined in the schema
+    private val customTypes = mutableSetOf<String>()
 
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
@@ -78,6 +82,24 @@ class XDSProcessor(
             logger.error("Invalid schema format")
             return
         }
+        
+        // First pass: collect all custom type names
+        customTypes.clear()
+        schemaObj.simpleTypeOrComplexTypeOrGroup.forEach {
+            when (it) {
+                is TopLevelComplexType -> {
+                    customTypes.add(it.name)
+                }
+                is TopLevelElement -> {
+                    it.name?.let { name -> customTypes.add(name) }
+                }
+                is TopLevelSimpleType -> {
+                    customTypes.add(it.name)
+                }
+            }
+        }
+        
+        // Second pass: generate types
         schemaObj.simpleTypeOrComplexTypeOrGroup.forEach {
             when (it) {
                 is TopLevelComplexType -> {
@@ -143,7 +165,7 @@ class XDSProcessor(
                                 val attrType = attr.type ?: QName("http://www.w3.org/2001/XMLSchema", "string")
                                 val kotlinType = getType(attrType)
                                 val isOptional = attr.use != "required"
-                                val paramType = if (isOptional) kotlinType.asTypeName().copy(nullable = true) else kotlinType.asTypeName()
+                                val paramType = if (isOptional) kotlinType.copy(nullable = true) else kotlinType
                                 
                                 val paramBuilder = ParameterSpec.builder(attr.name, paramType)
                                 if (isOptional) {
@@ -203,15 +225,15 @@ class XDSProcessor(
         val kotlinType = when {
             // maxOccurs > 1 or unbounded -> List
             maxOccurs == "unbounded" || (maxOccurs != null && maxOccurs.toIntOrNull()?.let { it > 1 } == true) -> {
-                LIST.parameterizedBy(baseType.asTypeName())
+                LIST.parameterizedBy(baseType)
             }
             // minOccurs = 0 or nillable -> nullable
             minOccurs == 0 || isNillable -> {
-                baseType.asTypeName().copy(nullable = true)
+                baseType.copy(nullable = true)
             }
             // Required element
             else -> {
-                baseType.asTypeName()
+                baseType
             }
         }
         
@@ -254,8 +276,14 @@ class XDSProcessor(
         }.build()
     }
 
-    fun getType(t: QName): KClass<*> {
-        return when (t.localPart) {
+    fun getType(t: QName): TypeName {
+        // First check if it's a custom type defined in this schema
+        if (customTypes.contains(t.localPart)) {
+            return ClassName("", t.localPart)
+        }
+        
+        // Otherwise, map to built-in types
+        val kclass = when (t.localPart) {
             // String types
             "string", "normalizedString", "token" -> String::class
             "language", "Name", "NCName", "ID", "IDREF", "ENTITY", "NMTOKEN" -> String::class
@@ -301,6 +329,7 @@ class XDSProcessor(
                 String::class
             }
         }
+        return kclass.asTypeName()
     }
     
     /**
@@ -365,7 +394,7 @@ class XDSProcessor(
         }
         
         // Create the value class with a single property
-        val propertySpec = PropertySpec.builder("value", kotlinType.asTypeName())
+        val propertySpec = PropertySpec.builder("value", kotlinType)
             .initializer("value")
             .also { propertyBuilder ->
                 // Add validation annotations based on collected facets
@@ -378,7 +407,7 @@ class XDSProcessor(
             .addAnnotation(JvmInline::class)
             .primaryConstructor(
                 FunSpec.constructorBuilder()
-                    .addParameter("value", kotlinType.asTypeName())
+                    .addParameter("value", kotlinType)
                     .build()
             )
             .addProperty(propertySpec)
