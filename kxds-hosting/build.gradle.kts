@@ -17,7 +17,7 @@ repositories {
 dependencies {
     implementation("com.google.devtools.ksp:symbol-processing-api:2.1.0-1.0.29")
     implementation("org.glassfish.jaxb:jaxb-runtime:4.0.6")
-    implementation("com.squareup:kotlinpoet:2.0.0")
+    implementation("com.squareup:kotlinpoet:2.2.0")
     implementation("io.github.pdvrieze.xmlutil:core:0.90.0-RC3")
     implementation("io.github.pdvrieze.xmlutil:core-jvm:0.90.0-RC3")
     implementation("io.github.pdvrieze.xmlutil:serialization-jvm:0.90.0-RC3")
