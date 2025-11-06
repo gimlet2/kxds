@@ -52,6 +52,17 @@ plugins {
 }
 
 dependencies {
+    implementation("org.restmonkeys:kxds-hosting:0.1.0")
+    ksp("org.restmonkeys:kxds-hosting:0.1.0")
+}
+```
+
+**Note**: If you're using the plugin from GitHub Packages, you'll need to add authentication. See [PUBLISHING.md](PUBLISHING.md) for details.
+
+For local development using the project directly:
+
+```kotlin
+dependencies {
     implementation(project(":kxds-hosting"))
     ksp(project(":kxds-hosting"))
 }
