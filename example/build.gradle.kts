@@ -15,6 +15,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(project(":kxds-hosting"))
     implementation("com.google.devtools.ksp:symbol-processing-api:2.1.0-1.0.29")
+    implementation("jakarta.validation:jakarta.validation-api:3.0.2")
     ksp(project(":kxds-hosting"))
     testImplementation(kotlin("test"))
 }

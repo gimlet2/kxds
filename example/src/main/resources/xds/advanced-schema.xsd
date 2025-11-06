@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="https://www.example.com/advanced"
+           xmlns="https://www.example.com/advanced"
+           elementFormDefault="qualified">
+
+    <!-- String type with pattern restriction -->
+    <xs:simpleType name="EmailAddress">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[^@]+@[^\.]+\..+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- String type with length restrictions -->
+    <xs:simpleType name="Username">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="3"/>
+            <xs:maxLength value="20"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Decimal type with range restrictions -->
+    <xs:simpleType name="Percentage">
+        <xs:restriction base="xs:decimal">
+            <xs:minInclusive value="0.0"/>
+            <xs:maxInclusive value="100.0"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Decimal with precision restrictions -->
+    <xs:simpleType name="Price">
+        <xs:restriction base="xs:decimal">
+            <xs:totalDigits value="10"/>
+            <xs:fractionDigits value="2"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Complex type using the restricted simple types -->
+    <xs:element name="User" type="User"/>
+    <xs:complexType name="User">
+        <xs:sequence>
+            <xs:element name="username" type="Username"/>
+            <xs:element name="email" type="EmailAddress"/>
+            <xs:element name="discount" type="Percentage"/>
+            <xs:element name="balance" type="Price"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

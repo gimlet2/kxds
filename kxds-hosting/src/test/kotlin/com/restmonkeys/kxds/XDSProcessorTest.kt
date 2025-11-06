@@ -255,6 +255,62 @@ class XDSProcessorTest {
         assertFalse(processor.shouldGenerateValueClass(baseType, restriction))
     }
 
+    @Test
+    fun `test toValueClass generates proper value class structure`() {
+        val processor = createProcessor()
+        val baseType = QName("http://www.w3.org/2001/XMLSchema", "string")
+        val restriction = org.w3._2001.xmlschema.Restriction()
+        restriction.base = baseType
+        
+        val pattern = org.w3._2001.xmlschema.Pattern()
+        pattern.value = "[a-z]+"
+        restriction.facets.add(pattern)
+        
+        val valueClass = processor.toValueClass("TestType", restriction)
+        
+        // Verify it's a value class
+        assertEquals("TestType", valueClass.name)
+        assertTrue(valueClass.modifiers.contains(com.squareup.kotlinpoet.KModifier.VALUE))
+        
+        // Verify it has the @JvmInline annotation
+        assertTrue(valueClass.annotations.any { it.typeName.toString().contains("JvmInline") })
+        
+        // Verify it has a value property
+        assertEquals(1, valueClass.propertySpecs.size)
+        assertEquals("value", valueClass.propertySpecs[0].name)
+        
+        // Verify the property has validation annotations
+        assertTrue(valueClass.propertySpecs[0].annotations.any { 
+            it.typeName.toString().contains("Pattern") 
+        })
+    }
+
+    @Test
+    fun `test toValueClass with multiple size constraints combines them`() {
+        val processor = createProcessor()
+        val baseType = QName("http://www.w3.org/2001/XMLSchema", "string")
+        val restriction = org.w3._2001.xmlschema.Restriction()
+        restriction.base = baseType
+        
+        val minLengthFacet = org.w3._2001.xmlschema.NumFacet()
+        minLengthFacet.value = "3"
+        val minLength = org.w3._2001.xmlschema.ObjectFactory().createMinLength(minLengthFacet)
+        restriction.facets.add(minLength)
+        
+        val maxLengthFacet = org.w3._2001.xmlschema.NumFacet()
+        maxLengthFacet.value = "20"
+        val maxLength = org.w3._2001.xmlschema.ObjectFactory().createMaxLength(maxLengthFacet)
+        restriction.facets.add(maxLength)
+        
+        val valueClass = processor.toValueClass("Username", restriction)
+        
+        // Verify it has exactly one Size annotation (not two)
+        val sizeAnnotations = valueClass.propertySpecs[0].annotations.filter { 
+            it.typeName.toString().contains("Size") 
+        }
+        assertEquals(1, sizeAnnotations.size)
+    }
+
     private fun createProcessor(): XDSProcessor {
         // Create a mock logger that doesn't do anything
         val logger = object : KSPLogger {
