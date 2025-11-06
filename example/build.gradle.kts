@@ -1,6 +1,6 @@
 plugins {
-    id("com.google.devtools.ksp") version "2.3.0"
-    kotlin("jvm") version "2.1.0"
+    id("com.google.devtools.ksp")
+    kotlin("jvm") version "2.2.21"
 
 }
 
@@ -14,8 +14,8 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation(project(":kxds-hosting"))
-    implementation("com.google.devtools.ksp:symbol-processing-api:2.1.0-1.0.29")
-    implementation("jakarta.validation:jakarta.validation-api:3.0.2")
+    implementation("com.google.devtools.ksp:symbol-processing-api:2.2.21-2.0.4")
+    implementation("jakarta.validation:jakarta.validation-api:3.1.1")
     ksp(project(":kxds-hosting"))
     testImplementation(kotlin("test"))
 }
