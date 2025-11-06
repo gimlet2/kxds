@@ -1,6 +1,6 @@
 pluginManagement {
-    val kotlinVersion: String = "2.1.0"
-    val kspVersion: String = "2.1.0-1.0.29"
+    val kotlinVersion: String = "2.2.21"
+    val kspVersion: String = "2.2.21-2.0.4"
     plugins {
         id("com.google.devtools.ksp") version kspVersion
         kotlin("jvm") version kotlinVersion
