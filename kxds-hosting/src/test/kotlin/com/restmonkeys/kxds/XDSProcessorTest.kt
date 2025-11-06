@@ -6,6 +6,8 @@ import com.google.devtools.ksp.processing.KSPLogger
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSFile
 import com.google.devtools.ksp.symbol.KSNode
+import com.squareup.kotlinpoet.ClassName
+import com.squareup.kotlinpoet.asTypeName
 import org.junit.jupiter.api.Test
 import java.math.BigInteger
 import java.net.URI
@@ -23,86 +25,112 @@ class XDSProcessorTest {
     @Test
     fun `test string type mapping`() {
         val processor = createProcessor()
-        assertEquals(String::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "string")))
-        assertEquals(String::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "normalizedString")))
-        assertEquals(String::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "token")))
+        assertEquals(String::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "string")))
+        assertEquals(String::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "normalizedString")))
+        assertEquals(String::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "token")))
     }
 
     @Test
     fun `test signed integer type mapping`() {
         val processor = createProcessor()
-        assertEquals(Int::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "int")))
-        assertEquals(Int::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "integer")))
-        assertEquals(Long::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "long")))
-        assertEquals(Short::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "short")))
-        assertEquals(Byte::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "byte")))
+        assertEquals(Int::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "int")))
+        assertEquals(Int::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "integer")))
+        assertEquals(Long::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "long")))
+        assertEquals(Short::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "short")))
+        assertEquals(Byte::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "byte")))
     }
 
     @Test
     fun `test unsigned integer type mapping`() {
         val processor = createProcessor()
-        assertEquals(BigInteger::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "unsignedLong")))
-        assertEquals(Long::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "unsignedInt")))
-        assertEquals(Int::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "unsignedShort")))
-        assertEquals(Short::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "unsignedByte")))
+        assertEquals(BigInteger::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "unsignedLong")))
+        assertEquals(Long::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "unsignedInt")))
+        assertEquals(Int::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "unsignedShort")))
+        assertEquals(Short::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "unsignedByte")))
     }
 
     @Test
     fun `test decimal type mapping`() {
         val processor = createProcessor()
-        assertEquals(java.math.BigDecimal::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "decimal")))
+        assertEquals(java.math.BigDecimal::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "decimal")))
     }
 
     @Test
     fun `test boolean type mapping`() {
         val processor = createProcessor()
-        assertEquals(Boolean::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "boolean")))
+        assertEquals(Boolean::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "boolean")))
     }
 
     @Test
     fun `test floating point type mapping`() {
         val processor = createProcessor()
-        assertEquals(Float::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "float")))
-        assertEquals(Double::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "double")))
+        assertEquals(Float::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "float")))
+        assertEquals(Double::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "double")))
     }
 
     @Test
     fun `test date and time type mapping`() {
         val processor = createProcessor()
-        assertEquals(LocalDateTime::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "dateTime")))
-        assertEquals(LocalDate::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "date")))
-        assertEquals(LocalTime::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "time")))
-        assertEquals(Duration::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "duration")))
+        assertEquals(LocalDateTime::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "dateTime")))
+        assertEquals(LocalDate::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "date")))
+        assertEquals(LocalTime::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "time")))
+        assertEquals(Duration::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "duration")))
     }
 
     @Test
     fun `test binary type mapping`() {
         val processor = createProcessor()
-        assertEquals(ByteArray::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "hexBinary")))
-        assertEquals(ByteArray::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "base64Binary")))
+        assertEquals(ByteArray::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "hexBinary")))
+        assertEquals(ByteArray::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "base64Binary")))
     }
 
     @Test
     fun `test URI type mapping`() {
         val processor = createProcessor()
-        assertEquals(URI::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "anyURI")))
+        assertEquals(URI::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "anyURI")))
     }
 
     @Test
     fun `test constrained integer type mapping`() {
         val processor = createProcessor()
-        assertEquals(BigInteger::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "positiveInteger")))
-        assertEquals(BigInteger::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "negativeInteger")))
-        assertEquals(BigInteger::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "nonPositiveInteger")))
-        assertEquals(BigInteger::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "nonNegativeInteger")))
+        assertEquals(BigInteger::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "positiveInteger")))
+        assertEquals(BigInteger::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "negativeInteger")))
+        assertEquals(BigInteger::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "nonPositiveInteger")))
+        assertEquals(BigInteger::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "nonNegativeInteger")))
     }
 
     @Test
     fun `test unsupported type defaults to String`() {
         val processor = createProcessor()
-        assertEquals(String::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "unknownType")))
-        assertEquals(String::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "QName")))
-        assertEquals(String::class, processor.getType(QName("http://www.w3.org/2001/XMLSchema", "NOTATION")))
+        assertEquals(String::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "unknownType")))
+        assertEquals(String::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "QName")))
+        assertEquals(String::class.asTypeName(), processor.getType(QName("http://www.w3.org/2001/XMLSchema", "NOTATION")))
+    }
+
+    @Test
+    fun `test custom type recognition`() {
+        val processor = createProcessor()
+        val schema = """
+            <?xml version="1.0"?>
+            <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                <xs:simpleType name="Username">
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="3"/>
+                    </xs:restriction>
+                </xs:simpleType>
+                <xs:complexType name="User">
+                    <xs:sequence>
+                        <xs:element name="username" type="Username"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:schema>
+        """.trimIndent()
+        
+        processor.generate(schema)
+        
+        // After generating the schema, custom types should be registered
+        val customType = processor.getType(QName("", "Username"))
+        assertEquals(ClassName("", "Username"), customType)
     }
 
     @Test
