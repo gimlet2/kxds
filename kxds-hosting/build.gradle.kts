@@ -4,6 +4,8 @@ plugins {
     kotlin("jvm")
     kotlin("plugin.serialization") version "2.1.0"
     id("com.github.bjornvester.xjc") version "1.8.2"
+    `maven-publish`
+    signing
 }
 
 repositories {
@@ -25,7 +27,7 @@ dependencies {
 }
 
 group = "org.restmonkeys"
-version = "1.0-SNAPSHOT"
+version = "0.1.0"
 
 tasks.test {
     useJUnitPlatform()
@@ -37,4 +39,99 @@ xjc {
 
 sourceSets.main {
     java.srcDir("build/generated/sources/xjc/java")
+}
+
+kotlin {
+    jvmToolchain(17)
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
+    withJavadocJar()
+}
+
+tasks.named<Jar>("sourcesJar") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from(sourceSets.main.get().allSource)
+    exclude("**/org/w3/**")  // Exclude generated XJC sources
+}
+
+tasks.named<Javadoc>("javadoc") {
+    options {
+        (this as StandardJavadocDocletOptions).addStringOption("Xdoclint:none", "-quiet")
+    }
+    // Exclude generated XJC sources from javadoc
+    exclude("**/org/w3/**")
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            
+            pom {
+                name.set("KXDS - Kotlin XSD Data Class Generator")
+                description.set("A Kotlin Symbol Processing (KSP) plugin that automatically generates Kotlin data classes from XML Schema Definition (XSD) files")
+                url.set("https://github.com/gimlet2/kxds")
+                
+                licenses {
+                    license {
+                        name.set("MIT License")
+                        url.set("https://opensource.org/licenses/MIT")
+                    }
+                }
+                
+                developers {
+                    developer {
+                        id.set("gimlet2")
+                        name.set("RestMonkeys")
+                        organizationUrl.set("https://github.com/gimlet2")
+                    }
+                }
+                
+                scm {
+                    connection.set("scm:git:git://github.com/gimlet2/kxds.git")
+                    developerConnection.set("scm:git:ssh://github.com/gimlet2/kxds.git")
+                    url.set("https://github.com/gimlet2/kxds")
+                }
+            }
+        }
+    }
+    
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/gimlet2/kxds")
+            credentials {
+                username = System.getenv("GITHUB_ACTOR")
+                password = System.getenv("GITHUB_TOKEN")
+            }
+        }
+        maven {
+            name = "OSSRH"
+            url = if (version.toString().endsWith("SNAPSHOT")) {
+                uri("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+            } else {
+                uri("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/")
+            }
+            credentials {
+                username = System.getenv("OSSRH_USERNAME")
+                password = System.getenv("OSSRH_PASSWORD")
+            }
+        }
+    }
+}
+
+signing {
+    val signingKey = System.getenv("SIGNING_KEY")
+    val signingPassword = System.getenv("SIGNING_PASSWORD")
+    if (signingKey != null && signingPassword != null) {
+        useInMemoryPgpKeys(signingKey, signingPassword)
+        sign(publishing.publications["maven"])
+    }
 }
