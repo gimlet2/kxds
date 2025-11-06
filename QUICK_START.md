@@ -134,6 +134,6 @@ Verify that:
 
 ## Requirements
 
-- JDK 17 or higher
+- JDK 21 or higher
 - Gradle 8.11.1 or higher
 - Kotlin 2.1.0
