@@ -409,11 +409,7 @@ class XDSProcessor(
                 sizeBuilder.addMember("min = %L", minLength)
             }
             if (maxLength != null) {
-                if (minLength != null) {
-                    sizeBuilder.addMember("max = %L", maxLength)
-                } else {
-                    sizeBuilder.addMember("max = %L", maxLength)
-                }
+                sizeBuilder.addMember("max = %L", maxLength)
             }
             propertyBuilder.addAnnotation(sizeBuilder.build())
         }
@@ -454,16 +450,22 @@ class XDSProcessor(
                 }
                 
                 // Handle digit constraints
+                // XSD totalDigits: max total digits; fractionDigits: max fractional digits
+                // Jakarta @Digits: integer = max integer digits, fraction = max fractional digits
                 val totalDigits = facetMap["totalDigits"]?.toIntOrNull()
                 val fractionDigits = facetMap["fractionDigits"]?.toIntOrNull()
                 
                 if (totalDigits != null || fractionDigits != null) {
                     val digitsBuilder = AnnotationSpec.builder(ClassName("jakarta.validation.constraints", "Digits"))
                     if (totalDigits != null && fractionDigits != null) {
-                        digitsBuilder.addMember("integer = %L, fraction = %L", totalDigits - fractionDigits, fractionDigits)
+                        // integer part = total - fraction
+                        val integerDigits = maxOf(0, totalDigits - fractionDigits)
+                        digitsBuilder.addMember("integer = %L, fraction = %L", integerDigits, fractionDigits)
                     } else if (totalDigits != null) {
+                        // Only totalDigits specified, assume no fractional part
                         digitsBuilder.addMember("integer = %L, fraction = 0", totalDigits)
                     } else if (fractionDigits != null) {
+                        // Only fractionDigits specified, use large integer limit
                         digitsBuilder.addMember("integer = 999, fraction = %L", fractionDigits)
                     }
                     propertyBuilder.addAnnotation(digitsBuilder.build())
