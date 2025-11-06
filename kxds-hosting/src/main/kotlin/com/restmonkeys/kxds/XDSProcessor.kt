@@ -10,6 +10,7 @@ import com.google.devtools.ksp.processing.SymbolProcessor
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.asTypeName
 import jakarta.xml.bind.JAXBContext
 import jakarta.xml.bind.JAXBElement
 import org.w3._2001.xmlschema.Attribute
