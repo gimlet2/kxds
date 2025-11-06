@@ -232,7 +232,7 @@ The project uses Gradle with Kotlin DSL for build configuration. Key technologie
 
 ## License
 
-This project is part of the RestMonkeys organization.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Contributing
 
