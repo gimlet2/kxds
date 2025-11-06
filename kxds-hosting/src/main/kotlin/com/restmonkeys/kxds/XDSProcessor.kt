@@ -17,10 +17,13 @@ import org.w3._2001.xmlschema.ComplexType
 import org.w3._2001.xmlschema.Facet
 import org.w3._2001.xmlschema.LocalElement
 import org.w3._2001.xmlschema.NoFixedFacet
+import org.w3._2001.xmlschema.Pattern
+import org.w3._2001.xmlschema.Restriction
 import org.w3._2001.xmlschema.Schema
 import org.w3._2001.xmlschema.TopLevelComplexType
 import org.w3._2001.xmlschema.TopLevelElement
 import org.w3._2001.xmlschema.TopLevelSimpleType
+import org.w3._2001.xmlschema.TotalDigits
 import java.io.File
 import java.math.BigInteger
 import java.net.URI
@@ -37,6 +40,16 @@ class XDSProcessor(
     val logger: KSPLogger,
     val options: Map<String, String>
 ) : SymbolProcessor {
+    
+    companion object {
+        // ClassName for Jakarta Validation annotations
+        private val JAKARTA_VALIDATION_PKG = "jakarta.validation.constraints"
+        
+        // Default maximum integer digits when only fractionDigits is specified
+        // This is a reasonable upper bound for most decimal use cases
+        private const val DEFAULT_MAX_INTEGER_DIGITS = 999
+    }
+
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         val rootPath = options["path"] ?: error("path option is required")
@@ -97,6 +110,13 @@ class XDSProcessor(
                         if (enumerations.isNotEmpty()) {
                             logger.info("Generating enum for simple type: ${it.name} with ${enumerations.size} values")
                             toEnum(it.name, enumerations).toCode()
+                        } else {
+                            // Handle non-enumeration restrictions (e.g., pattern, minLength, maxLength, etc.)
+                            val baseType = restriction.base
+                            if (baseType != null && shouldGenerateValueClass(baseType, restriction)) {
+                                logger.info("Generating value class for simple type: ${it.name} with restrictions")
+                                toValueClass(it.name, restriction).toCode()
+                            }
                         }
                     }
                 }
@@ -279,6 +299,196 @@ class XDSProcessor(
             else -> {
                 logger.warn("Unsupported type '${t.localPart}', defaulting to String")
                 String::class
+            }
+        }
+    }
+    
+    /**
+     * Determine if we should generate a value class for this restriction
+     * Currently supports: string, decimal, and dateTime base types
+     */
+    fun shouldGenerateValueClass(baseType: QName, restriction: Restriction): Boolean {
+        val baseName = baseType.localPart
+        val facets = restriction.facets ?: return false
+        
+        // Check if there are any relevant facets (excluding enumerations which are already handled)
+        val hasRelevantFacets = facets.any { facet ->
+            when (facet) {
+                is JAXBElement<*> -> {
+                    val facetName = facet.name.localPart
+                    facetName in listOf(
+                        "pattern", "minLength", "maxLength", "length",
+                        "minInclusive", "maxInclusive", "minExclusive", "maxExclusive",
+                        "totalDigits", "fractionDigits"
+                    )
+                }
+                is Pattern, is TotalDigits -> true
+                else -> false
+            }
+        }
+        
+        if (!hasRelevantFacets) return false
+        
+        // Only generate for string, decimal, and dateTime types
+        return baseName in listOf("string", "decimal", "dateTime")
+    }
+    
+    /**
+     * Generate a value class with validation annotations based on the restriction
+     */
+    fun toValueClass(className: String, restriction: Restriction): TypeSpec {
+        val baseType = restriction.base ?: error("Restriction must have a base type")
+        val kotlinType = getType(baseType)
+        
+        // Collect all facets first
+        val facetMap = mutableMapOf<String, String>()
+        restriction.facets?.forEach { facet ->
+            when (facet) {
+                is JAXBElement<*> -> {
+                    val facetName = facet.name.localPart
+                    val facetValue = when (val value = facet.value) {
+                        is NoFixedFacet -> value.value
+                        is Facet -> value.value
+                        else -> null
+                    }
+                    if (facetValue != null) {
+                        facetMap[facetName] = facetValue
+                    }
+                }
+                is Pattern -> {
+                    facetMap["pattern"] = facet.value
+                }
+                is TotalDigits -> {
+                    facetMap["totalDigits"] = facet.value.toString()
+                }
+            }
+        }
+        
+        // Create the value class with a single property
+        val propertySpec = PropertySpec.builder("value", kotlinType.asTypeName())
+            .initializer("value")
+            .also { propertyBuilder ->
+                // Add validation annotations based on collected facets
+                addValidationAnnotations(propertyBuilder, facetMap, baseType.localPart)
+            }
+            .build()
+        
+        return TypeSpec.classBuilder(className)
+            .addModifiers(KModifier.VALUE)
+            .addAnnotation(JvmInline::class)
+            .primaryConstructor(
+                FunSpec.constructorBuilder()
+                    .addParameter("value", kotlinType.asTypeName())
+                    .build()
+            )
+            .addProperty(propertySpec)
+            .build()
+    }
+    
+    /**
+     * Add validation annotations to a property based on collected facets
+     */
+    private fun addValidationAnnotations(
+        propertyBuilder: PropertySpec.Builder,
+        facetMap: Map<String, String>,
+        baseType: String
+    ) {
+        // Handle pattern
+        facetMap["pattern"]?.let { pattern ->
+            val patternAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "Pattern"))
+                .addMember("regexp = %S", pattern)
+                .build()
+            propertyBuilder.addAnnotation(patternAnnotation)
+        }
+        
+        // Handle size constraints (length, minLength, maxLength)
+        val length = facetMap["length"]?.toIntOrNull()
+        val minLength = facetMap["minLength"]?.toIntOrNull()
+        val maxLength = facetMap["maxLength"]?.toIntOrNull()
+        
+        if (length != null) {
+            // Exact length specified
+            val sizeAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "Size"))
+                .addMember("min = %L, max = %L", length, length)
+                .build()
+            propertyBuilder.addAnnotation(sizeAnnotation)
+        } else if (minLength != null || maxLength != null) {
+            // Min and/or max length specified
+            val sizeBuilder = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "Size"))
+            if (minLength != null) {
+                sizeBuilder.addMember("min = %L", minLength)
+            }
+            if (maxLength != null) {
+                sizeBuilder.addMember("max = %L", maxLength)
+            }
+            propertyBuilder.addAnnotation(sizeBuilder.build())
+        }
+        
+        // Handle decimal range constraints
+        when (baseType) {
+            "decimal" -> {
+                // Handle min constraints
+                facetMap["minInclusive"]?.let { minValue ->
+                    val minAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "DecimalMin"))
+                        .addMember("value = %S", minValue)
+                        .build()
+                    propertyBuilder.addAnnotation(minAnnotation)
+                }
+                
+                facetMap["minExclusive"]?.let { minValue ->
+                    val minAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "DecimalMin"))
+                        .addMember("value = %S", minValue)
+                        .addMember("inclusive = false")
+                        .build()
+                    propertyBuilder.addAnnotation(minAnnotation)
+                }
+                
+                // Handle max constraints
+                facetMap["maxInclusive"]?.let { maxValue ->
+                    val maxAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "DecimalMax"))
+                        .addMember("value = %S", maxValue)
+                        .build()
+                    propertyBuilder.addAnnotation(maxAnnotation)
+                }
+                
+                facetMap["maxExclusive"]?.let { maxValue ->
+                    val maxAnnotation = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "DecimalMax"))
+                        .addMember("value = %S", maxValue)
+                        .addMember("inclusive = false")
+                        .build()
+                    propertyBuilder.addAnnotation(maxAnnotation)
+                }
+                
+                // Handle digit constraints
+                // XSD totalDigits: max total digits; fractionDigits: max fractional digits
+                // Jakarta @Digits: integer = max integer digits, fraction = max fractional digits
+                val totalDigits = facetMap["totalDigits"]?.toIntOrNull()
+                val fractionDigits = facetMap["fractionDigits"]?.toIntOrNull()
+                
+                if (totalDigits != null || fractionDigits != null) {
+                    val digitsBuilder = AnnotationSpec.builder(ClassName(JAKARTA_VALIDATION_PKG, "Digits"))
+                    if (totalDigits != null && fractionDigits != null) {
+                        // Integer part = total - fraction
+                        // Use maxOf(0, ...) to handle edge case where fractionDigits > totalDigits
+                        // (which would be invalid XSD, but we handle gracefully)
+                        val integerDigits = maxOf(0, totalDigits - fractionDigits)
+                        digitsBuilder.addMember("integer = %L, fraction = %L", integerDigits, fractionDigits)
+                    } else if (totalDigits != null) {
+                        // Only totalDigits specified, assume no fractional part
+                        digitsBuilder.addMember("integer = %L, fraction = 0", totalDigits)
+                    } else if (fractionDigits != null) {
+                        // Only fractionDigits specified, use reasonable default for integer limit
+                        digitsBuilder.addMember("integer = %L, fraction = %L", DEFAULT_MAX_INTEGER_DIGITS, fractionDigits)
+                    }
+                    propertyBuilder.addAnnotation(digitsBuilder.build())
+                }
+            }
+            "dateTime", "date", "time" -> {
+                // For date/time types, log the constraints as comments
+                facetMap["minInclusive"]?.let { logger.info("MinInclusive constraint on $baseType: $it") }
+                facetMap["maxInclusive"]?.let { logger.info("MaxInclusive constraint on $baseType: $it") }
+                facetMap["minExclusive"]?.let { logger.info("MinExclusive constraint on $baseType: $it") }
+                facetMap["maxExclusive"]?.let { logger.info("MaxExclusive constraint on $baseType: $it") }
             }
         }
     }

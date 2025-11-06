@@ -21,6 +21,7 @@ dependencies {
     implementation("io.github.pdvrieze.xmlutil:core:0.90.0-RC3")
     implementation("io.github.pdvrieze.xmlutil:core-jvm:0.90.0-RC3")
     implementation("io.github.pdvrieze.xmlutil:serialization-jvm:0.90.0-RC3")
+    implementation("jakarta.validation:jakarta.validation-api:3.0.2")
     testImplementation(kotlin("test"))
 
 }

@@ -15,6 +15,8 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import javax.xml.namespace.QName
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class XDSProcessorTest {
 
@@ -122,6 +124,191 @@ class XDSProcessorTest {
         
         val constants = enumSpec.enumConstants.map { it.key }
         assertEquals(listOf("VALUE_1", "VALUE_2", "VALUE_3", "_123VALUE"), constants)
+    }
+
+    @Test
+    fun `test value class generation with pattern restriction`() {
+        val processor = createProcessor()
+        val schema = """
+            <?xml version="1.0"?>
+            <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                <xs:simpleType name="EmailAddress">
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="[^@]+@[^\.]+\..+"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:schema>
+        """.trimIndent()
+        
+        processor.generate(schema)
+        // If no exception is thrown, the test passes
+    }
+
+    @Test
+    fun `test value class generation with length restrictions`() {
+        val processor = createProcessor()
+        val schema = """
+            <?xml version="1.0"?>
+            <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                <xs:simpleType name="Username">
+                    <xs:restriction base="xs:string">
+                        <xs:minLength value="3"/>
+                        <xs:maxLength value="20"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:schema>
+        """.trimIndent()
+        
+        processor.generate(schema)
+    }
+
+    @Test
+    fun `test value class generation with decimal restrictions`() {
+        val processor = createProcessor()
+        val schema = """
+            <?xml version="1.0"?>
+            <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                <xs:simpleType name="Percentage">
+                    <xs:restriction base="xs:decimal">
+                        <xs:minInclusive value="0.0"/>
+                        <xs:maxInclusive value="100.0"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:schema>
+        """.trimIndent()
+        
+        processor.generate(schema)
+    }
+
+    @Test
+    fun `test value class generation with dateTime restrictions`() {
+        val processor = createProcessor()
+        val schema = """
+            <?xml version="1.0"?>
+            <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+                <xs:simpleType name="FutureDateTime">
+                    <xs:restriction base="xs:dateTime">
+                        <xs:minInclusive value="2025-01-01T00:00:00"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:schema>
+        """.trimIndent()
+        
+        processor.generate(schema)
+    }
+
+    @Test
+    fun `test shouldGenerateValueClass for string with pattern`() {
+        val processor = createProcessor()
+        val baseType = QName("http://www.w3.org/2001/XMLSchema", "string")
+        val restriction = org.w3._2001.xmlschema.Restriction()
+        restriction.base = baseType
+        
+        val pattern = org.w3._2001.xmlschema.Pattern()
+        pattern.value = "[a-z]+"
+        restriction.facets.add(pattern)
+        
+        assertTrue(processor.shouldGenerateValueClass(baseType, restriction))
+    }
+
+    @Test
+    fun `test shouldGenerateValueClass for decimal with range`() {
+        val processor = createProcessor()
+        val baseType = QName("http://www.w3.org/2001/XMLSchema", "decimal")
+        val restriction = org.w3._2001.xmlschema.Restriction()
+        restriction.base = baseType
+        
+        val facet = org.w3._2001.xmlschema.NoFixedFacet()
+        facet.value = "0.0"
+        val elem = org.w3._2001.xmlschema.ObjectFactory().createMinInclusive(facet)
+        restriction.facets.add(elem)
+        
+        assertTrue(processor.shouldGenerateValueClass(baseType, restriction))
+    }
+
+    @Test
+    fun `test shouldGenerateValueClass returns false for enumerations`() {
+        val processor = createProcessor()
+        val baseType = QName("http://www.w3.org/2001/XMLSchema", "string")
+        val restriction = org.w3._2001.xmlschema.Restriction()
+        restriction.base = baseType
+        
+        val facet = org.w3._2001.xmlschema.NoFixedFacet()
+        facet.value = "value1"
+        val elem = org.w3._2001.xmlschema.ObjectFactory().createEnumeration(facet)
+        restriction.facets.add(elem)
+        
+        assertFalse(processor.shouldGenerateValueClass(baseType, restriction))
+    }
+
+    @Test
+    fun `test shouldGenerateValueClass returns false for unsupported types`() {
+        val processor = createProcessor()
+        val baseType = QName("http://www.w3.org/2001/XMLSchema", "int")
+        val restriction = org.w3._2001.xmlschema.Restriction()
+        restriction.base = baseType
+        
+        val pattern = org.w3._2001.xmlschema.Pattern()
+        pattern.value = "[0-9]+"
+        restriction.facets.add(pattern)
+        
+        assertFalse(processor.shouldGenerateValueClass(baseType, restriction))
+    }
+
+    @Test
+    fun `test toValueClass generates proper value class structure`() {
+        val processor = createProcessor()
+        val baseType = QName("http://www.w3.org/2001/XMLSchema", "string")
+        val restriction = org.w3._2001.xmlschema.Restriction()
+        restriction.base = baseType
+        
+        val pattern = org.w3._2001.xmlschema.Pattern()
+        pattern.value = "[a-z]+"
+        restriction.facets.add(pattern)
+        
+        val valueClass = processor.toValueClass("TestType", restriction)
+        
+        // Verify it's a value class
+        assertEquals("TestType", valueClass.name)
+        assertTrue(valueClass.modifiers.contains(com.squareup.kotlinpoet.KModifier.VALUE))
+        
+        // Verify it has the @JvmInline annotation
+        assertTrue(valueClass.annotations.any { it.typeName.toString().contains("JvmInline") })
+        
+        // Verify it has a value property
+        assertEquals(1, valueClass.propertySpecs.size)
+        assertEquals("value", valueClass.propertySpecs[0].name)
+        
+        // Verify the property has validation annotations
+        assertTrue(valueClass.propertySpecs[0].annotations.any { 
+            it.typeName.toString().contains("Pattern") 
+        })
+    }
+
+    @Test
+    fun `test toValueClass with multiple size constraints combines them`() {
+        val processor = createProcessor()
+        val baseType = QName("http://www.w3.org/2001/XMLSchema", "string")
+        val restriction = org.w3._2001.xmlschema.Restriction()
+        restriction.base = baseType
+        
+        val minLengthFacet = org.w3._2001.xmlschema.NumFacet()
+        minLengthFacet.value = "3"
+        val minLength = org.w3._2001.xmlschema.ObjectFactory().createMinLength(minLengthFacet)
+        restriction.facets.add(minLength)
+        
+        val maxLengthFacet = org.w3._2001.xmlschema.NumFacet()
+        maxLengthFacet.value = "20"
+        val maxLength = org.w3._2001.xmlschema.ObjectFactory().createMaxLength(maxLengthFacet)
+        restriction.facets.add(maxLength)
+        
+        val valueClass = processor.toValueClass("Username", restriction)
+        
+        // Verify it has exactly one Size annotation (not two)
+        val sizeAnnotations = valueClass.propertySpecs[0].annotations.filter { 
+            it.typeName.toString().contains("Size") 
+        }
+        assertEquals(1, sizeAnnotations.size)
     }
 
     private fun createProcessor(): XDSProcessor {

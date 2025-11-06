@@ -64,4 +64,16 @@ class XDSProcessorIntegrationTest {
         assertTrue(schemaContent.contains("PriorityLevel"), "Schema should contain PriorityLevel")
         assertTrue(schemaContent.contains("xs:enumeration"), "Schema should contain enumerations")
     }
+    
+    @Test
+    fun `test simple type restrictions schema generation`() {
+        val schemaContent = File("src/test/resources/schemas/simple-type-restrictions-test.xsd").readText()
+        
+        assertTrue(schemaContent.contains("EmailAddress"), "Schema should contain EmailAddress")
+        assertTrue(schemaContent.contains("Username"), "Schema should contain Username")
+        assertTrue(schemaContent.contains("Percentage"), "Schema should contain Percentage")
+        assertTrue(schemaContent.contains("xs:pattern"), "Schema should contain pattern restriction")
+        assertTrue(schemaContent.contains("xs:minLength"), "Schema should contain minLength restriction")
+        assertTrue(schemaContent.contains("xs:minInclusive"), "Schema should contain minInclusive restriction")
+    }
 }

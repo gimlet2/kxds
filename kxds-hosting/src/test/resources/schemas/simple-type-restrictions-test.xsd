@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://test.example.com/restrictions"
+           xmlns="http://test.example.com/restrictions"
+           elementFormDefault="qualified">
+
+    <!-- String type with pattern restriction -->
+    <xs:simpleType name="EmailAddress">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="[^@]+@[^\.]+\..+"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- String type with length restrictions -->
+    <xs:simpleType name="Username">
+        <xs:restriction base="xs:string">
+            <xs:minLength value="3"/>
+            <xs:maxLength value="20"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- String type with exact length -->
+    <xs:simpleType name="CountryCode">
+        <xs:restriction base="xs:string">
+            <xs:length value="2"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Decimal type with range restrictions -->
+    <xs:simpleType name="Percentage">
+        <xs:restriction base="xs:decimal">
+            <xs:minInclusive value="0.0"/>
+            <xs:maxInclusive value="100.0"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Decimal type with exclusive range -->
+    <xs:simpleType name="PositiveDecimal">
+        <xs:restriction base="xs:decimal">
+            <xs:minExclusive value="0.0"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Decimal with precision restrictions -->
+    <xs:simpleType name="Price">
+        <xs:restriction base="xs:decimal">
+            <xs:totalDigits value="10"/>
+            <xs:fractionDigits value="2"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- DateTime type with range restrictions -->
+    <xs:simpleType name="FutureDateTime">
+        <xs:restriction base="xs:dateTime">
+            <xs:minInclusive value="2025-01-01T00:00:00"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- DateTime type with range -->
+    <xs:simpleType name="DateTimeRange">
+        <xs:restriction base="xs:dateTime">
+            <xs:minInclusive value="2025-01-01T00:00:00"/>
+            <xs:maxInclusive value="2025-12-31T23:59:59"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+</xs:schema>
