@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Date/time types (dateTime, date, time, duration)
   - Binary types (hexBinary, base64Binary)
   - URI types
-- Comprehensive test suite with 40+ unit tests
+- Comprehensive test suite with 31 tests (24 unit tests + 7 integration tests)
 - Example module demonstrating usage
 - CI/CD pipelines for building, testing, and publishing
 - Documentation including README, QUICK_START, and PUBLISHING guides
