@@ -52,7 +52,7 @@ There are many ways to contribute to KXDS:
 ### Prerequisites
 
 - **JDK 21** or higher
-- **Gradle 8.11.1** or higher (included via wrapper)
+- **Gradle 9.3.1** or higher (included via wrapper)
 - **Git**
 - An IDE with Kotlin support (IntelliJ IDEA recommended)
 

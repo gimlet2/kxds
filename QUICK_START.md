@@ -10,8 +10,8 @@ In your `build.gradle.kts`, add the KSP plugin:
 
 ```kotlin
 plugins {
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
-    kotlin("jvm") version "2.1.0"
+    id("com.google.devtools.ksp") version "2.3.5"
+    kotlin("jvm") version "2.3.0"
 }
 ```
 
@@ -135,5 +135,5 @@ Verify that:
 ## Requirements
 
 - JDK 21 or higher
-- Gradle 8.11.1 or higher
-- Kotlin 2.1.0
+- Gradle 9.3.1 or higher
+- Kotlin 2.3.0
