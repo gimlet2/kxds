@@ -47,8 +47,8 @@ The project consists of three main modules:
 ## Requirements
 
 - JDK 21 or higher
-- Gradle 8.11.1 or higher
-- Kotlin 2.2.21
+- Gradle 9.3.1 or higher
+- Kotlin 2.3.0
 
 ## Usage
 
@@ -58,8 +58,8 @@ The project consists of three main modules:
 
 ```kotlin
 plugins {
-    id("com.google.devtools.ksp") version "2.2.21-2.0.4"
-    kotlin("jvm") version "2.2.21"
+    id("com.google.devtools.ksp") version "2.3.5"
+    kotlin("jvm") version "2.3.0"
 }
 
 dependencies {
