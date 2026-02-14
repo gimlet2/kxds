@@ -1,7 +1,7 @@
 # KXDS - Kotlin XSD Data Class Generator
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg?logo=kotlin)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.0-blue.svg?logo=kotlin)](https://kotlinlang.org)
 [![Build](https://github.com/gimlet2/kxds/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/gimlet2/kxds/actions/workflows/build-and-test.yml)
 
 A Kotlin Symbol Processing (KSP) plugin that automatically generates Kotlin data classes from XML Schema Definition (XSD) files.
