@@ -1,6 +1,17 @@
 # KXDS - Kotlin XSD Data Class Generator
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.2.21-blue.svg?logo=kotlin)](https://kotlinlang.org)
+[![Build](https://github.com/gimlet2/kxds/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/gimlet2/kxds/actions/workflows/build-and-test.yml)
+
 A Kotlin Symbol Processing (KSP) plugin that automatically generates Kotlin data classes from XML Schema Definition (XSD) files.
+
+> **Important Links:**
+> - [Quick Start Guide](QUICK_START.md) - Get started quickly
+> - [Contributing Guidelines](CONTRIBUTING.md) - How to contribute
+> - [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
+> - [Security Policy](SECURITY.md) - Report vulnerabilities
+> - [Changelog](CHANGELOG.md) - Version history
 
 ## Overview
 
@@ -37,7 +48,7 @@ The project consists of three main modules:
 
 - JDK 21 or higher
 - Gradle 8.11.1 or higher
-- Kotlin 2.1.0
+- Kotlin 2.2.21
 
 ## Usage
 
@@ -47,8 +58,8 @@ The project consists of three main modules:
 
 ```kotlin
 plugins {
-    id("com.google.devtools.ksp") version "2.1.0-1.0.29"
-    kotlin("jvm") version "2.1.0"
+    id("com.google.devtools.ksp") version "2.2.21-2.0.4"
+    kotlin("jvm") version "2.2.21"
 }
 
 dependencies {
@@ -247,4 +258,29 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+Contributions are welcome! We appreciate your interest in improving KXDS.
+
+### How to Contribute
+
+1. **Fork the repository** and create a feature branch
+2. **Make your changes** following our coding standards
+3. **Write tests** for your changes
+4. **Submit a pull request** with a clear description
+
+Please read our [Contributing Guidelines](CONTRIBUTING.md) for detailed information on:
+- Development setup
+- Coding standards
+- Testing guidelines
+- Pull request process
+
+### Code of Conduct
+
+Please note that this project is released with a [Code of Conduct](CODE_OF_CONDUCT.md). By participating in this project you agree to abide by its terms.
+
+### Reporting Issues
+
+Found a bug or have a feature request? Please check our [issue templates](.github/ISSUE_TEMPLATE) and submit an issue on GitHub.
+
+### Security
+
+For security vulnerabilities, please see our [Security Policy](SECURITY.md) for responsible disclosure guidelines.
