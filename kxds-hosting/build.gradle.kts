@@ -2,7 +2,7 @@ import java.net.URL
 
 plugins {
     kotlin("jvm")
-    kotlin("plugin.serialization") version "2.3.0"
+    kotlin("plugin.serialization") version "2.3.21"
     id("com.github.bjornvester.xjc") version "1.9.0"
     `maven-publish`
 }
@@ -15,9 +15,9 @@ repositories {
 }
 
 dependencies {
-    implementation("com.google.devtools.ksp:symbol-processing-api:2.3.5")
+    implementation("com.google.devtools.ksp:symbol-processing-api:2.3.7")
     implementation("org.glassfish.jaxb:jaxb-runtime:4.0.8")
-    implementation("com.squareup:kotlinpoet:2.2.0")
+    implementation("com.squareup:kotlinpoet:2.3.0")
     implementation("io.github.pdvrieze.xmlutil:core:0.91.3")
     implementation("io.github.pdvrieze.xmlutil:serialization:0.91.3")
     implementation("jakarta.validation:jakarta.validation-api:3.1.1")
