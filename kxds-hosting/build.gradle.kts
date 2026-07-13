@@ -2,7 +2,7 @@ import java.net.URL
 
 plugins {
     kotlin("jvm")
-    kotlin("plugin.serialization") version "2.3.21"
+    kotlin("plugin.serialization") version "2.4.0"
     id("com.github.bjornvester.xjc") version "1.9.0"
     `maven-publish`
 }
